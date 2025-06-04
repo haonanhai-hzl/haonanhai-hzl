@@ -2,8 +2,8 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <!-- 适配手机端，禁止缩放干扰动画 -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <!-- 强制竖屏、锁定缩放，适配手机端沉浸体验 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, orientation=portrait" />
   <title>祝孙家赢高考大捷</title>
   <style>
     * {
@@ -12,32 +12,60 @@
       box-sizing: border-box;
     }
     body {
-      /* 固定高度占满屏幕，溢出隐藏避免滚动干扰 */
       height: 100vh;
       overflow: hidden;
-      /* 柔和渐变背景，突出爱心 */
       background: linear-gradient(135deg, #ffe6f2, #f9f9f9);
-      /* 让内容垂直水平居中 */
       display: flex;
       justify-content: center;
       align-items: center;
       font-family: "Microsoft YaHei", sans-serif;
       position: relative;
+      /* 让滚动字幕覆盖时更顺滑 */
+      perspective: 1000px; 
     }
-    /* 核心：让 canvas 作为 “前景层”，文字在上方 */
+    /* 全屏粒子背景（辅助氛围） */
+    #particleCanvas {
+      position: fixed;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      background: transparent;
+    }
+    /* 动态爱心前景（从底层透出） */
     #heartCanvas {
-      position: fixed; 
-      /* 覆盖整个视口，层级低于文字但高于背景 */
-      width: 100vw; 
-      height: 100vh; 
-      z-index: 1; 
-      /* 让 canvas 背景透明，只显示爱心 */
-      background: transparent; 
+      position: fixed;
+      width: 100vw;
+      height: 100vh;
+      z-index: 2;
+      background: transparent;
     }
+    /* 全屏滚动字幕容器（开场核心） */
+    .fullscreen-text {
+      position: fixed;
+      z-index: 3; /* 盖在爱心、粒子上方 */
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      /* 让文字有3D滚动感 */
+      transform-style: preserve-3d; 
+    }
+    .fullscreen-text span {
+      font-size: 18vw; /* 适配手机，文字占满屏幕宽度 */
+      font-weight: bold;
+      color: #ff4d6a;
+      text-shadow: 0 8px 16px rgba(255, 77, 106, 0.3);
+      /* 初始状态：从屏幕上方 -100% 位置进入 */
+      transform: translateY(-150%) translateZ(50px); 
+      opacity: 0;
+      animation: fullscreenScroll 6s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+    }
+    /* 文字卡片（字幕结束后显示，可调整延迟让过渡更自然） */
     .card {
-      /* 文字卡片层级更高，盖在爱心上方 */
-      position: relative; 
-      z-index: 2; 
+      position: relative;
+      z-index: 4;
       width: 90%;
       max-width: 500px;
       background: rgba(255, 255, 255, 0.92);
@@ -45,15 +73,16 @@
       border-radius: 20px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
       text-align: center;
-      /* 毛玻璃效果（可选，增强浪漫） */
-      backdrop-filter: blur(8px); 
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      /* 字幕动画结束后，延迟0.5秒显示卡片 */
+      animation: fadeIn 1s 6.5s forwards; 
     }
     .title {
       font-size: 28px;
       color: #ff4d6a;
       font-weight: bold;
       margin-bottom: 12px;
-      /* 文字渐变（呼应爱心色调） */
       background: linear-gradient(90deg, #ff6b81, #ff4757);
       -webkit-background-clip: text;
       background-clip: text;
@@ -82,12 +111,44 @@
       font-style: italic;
       margin-top: 15px;
     }
+
+    /* 全屏文字滚动动画 */
+    @keyframes fullscreenScroll {
+      0% {
+        transform: translateY(-150%) translateZ(50px);
+        opacity: 0;
+      }
+      30% {
+        transform: translateY(0) translateZ(50px);
+        opacity: 1;
+      }
+      70% {
+        transform: translateY(0) translateZ(50px);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(150%) translateZ(50px);
+        opacity: 0;
+      }
+    }
+    /* 卡片渐显动画 */
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
   </style>
 </head>
 <body>
-  <!-- 爱心 canvas 容器，作为前景动态层 -->
+  <!-- 辅助粒子背景（柔和点缀） -->
+  <canvas id="particleCanvas"></canvas>
+  <!-- 动态爱心前景（从底层透出） -->
   <canvas id="heartCanvas"></canvas>
-  <!-- 文字卡片 -->
+  <!-- 全屏滚动字幕（开场仪式感） -->
+  <div class="fullscreen-text">
+    <span>祝孙家赢高考大捷</span>
+  </div>
+  <!-- 核心祝福卡片（字幕结束后显示） -->
   <div class="card">
     <h1 class="title">祝孙家赢同学</h1>
     <p class="subtitle">高考大捷</p>
@@ -103,78 +164,102 @@
   </div>
 
   <script>
-    // 【核心：Canvas 动态爱心逻辑】
-    const canvas = document.getElementById('heartCanvas');
-    const ctx = canvas.getContext('2d');
-    let hearts = []; // 存储爱心粒子
+    // 【粒子背景逻辑：辅助氛围】
+    const particleCanvas = document.getElementById('particleCanvas');
+    const particleCtx = particleCanvas.getContext('2d');
+    let particles = [];
 
-    // 初始化 canvas 尺寸（适配手机）
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+    function resizeParticleCanvas() {
+      particleCanvas.width = window.innerWidth;
+      particleCanvas.height = window.innerHeight;
     }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
+    window.addEventListener('resize', resizeParticleCanvas);
+    resizeParticleCanvas();
 
-    // 生成随机爱心（数学公式：爱心曲线）
-    function createHeart(x, y) {
+    function createParticle() {
       return {
-        x,
-        y,
-        // 随机飘落速度（y 轴）
-        speed: Math.random() * 2 + 1, 
-        // 随机缩放（0.3~1 倍，避免太大/太小）
-        scale: Math.random() * 0.7 + 0.3, 
-        // 让爱心颜色有细微变化（粉-红渐变）
-        hue: Math.random() * 30 + 340 
+        x: Math.random() * particleCanvas.width,
+        y: Math.random() * particleCanvas.height,
+        speed: Math.random() * 1.5 + 0.5,
+        size: Math.random() * 3 + 1,
+        hue: Math.random() * 30 + 340 // 粉-白渐变色调
       };
     }
 
-    // 每一帧绘制 + 动画逻辑
-    function animate() {
-      requestAnimationFrame(animate);
-      // 清空画布（透明背景，不清空会拖影）
-      ctx.clearRect(0, 0, canvas.width, canvas.height); 
+    function animateParticles() {
+      requestAnimationFrame(animateParticles);
+      particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
 
-      hearts.forEach((heart, index) => {
-        // 更新位置：让爱心 “往下飘”
-        heart.y += heart.speed;
+      particles.forEach((p, i) => {
+        p.y += p.speed;
+        if (p.y > particleCanvas.height) p.y = -p.size;
 
-        // 超出屏幕就重置（从顶部重新掉落）
-        if (heart.y > canvas.height) {
-          heart.y = -50; 
-          heart.x = Math.random() * canvas.width;
-        }
+        particleCtx.beginPath();
+        particleCtx.fillStyle = `hsla(${p.hue}, 100%, 90%, 0.4)`;
+        particleCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        particleCtx.fill();
 
-        // 绘制爱心：用二次贝塞尔曲线模拟
-        ctx.beginPath();
-        // 爱心颜色（HSLA 让透明度变化更柔和）
-        ctx.fillStyle = `hsla(${heart.hue}, 100%, 60%, 0.7)`; 
-        // 缩放后的爱心尺寸
-        const size = 30 * heart.scale; 
-        // 爱心曲线公式（核心数学逻辑）
-        ctx.scale(heart.scale, heart.scale);
-        ctx.translate(heart.x / heart.scale, heart.y / heart.scale);
-        ctx.bezierCurveTo(0, -size/2, -size/3, -size, -size, -size/2);
-        ctx.bezierCurveTo(-size*1.2, 0, 0, size/2, size, -size/2);
-        ctx.bezierCurveTo(size/3, -size, 0, -size/2, 0, -size/2);
-        ctx.fill();
-        // 重置变换（避免影响下一帧）
-        ctx.setTransform(1, 0, 0, 1, 0, 0); 
-
-        // 可选：让爱心左右 “飘” 动（增加随机性）
-        heart.x += Math.sin(Date.now() * 0.001 + index) * 1.2;
+        // 轻微左右飘动
+        p.x += Math.sin(Date.now() * 0.001 + i) * 0.8;
       });
 
-      // 定时补充新爱心（保持画面持续飘落）
-      if (hearts.length < 80) { 
-        // 从顶部随机位置生成
-        hearts.push(createHeart(Math.random() * canvas.width, -50)); 
+      if (particles.length < 100) {
+        particles.push(createParticle());
       }
     }
+    animateParticles();
 
-    // 启动动画
-    animate();
+    // 【动态爱心逻辑：从底层透出】
+    const heartCanvas = document.getElementById('heartCanvas');
+    const heartCtx = heartCanvas.getContext('2d');
+    let hearts = [];
+
+    function resizeHeartCanvas() {
+      heartCanvas.width = window.innerWidth;
+      heartCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeHeartCanvas);
+    resizeHeartCanvas();
+
+    function createHeart() {
+      return {
+        x: Math.random() * heartCanvas.width,
+        y: -50,
+        speed: Math.random() * 2 + 1,
+        scale: Math.random() * 0.7 + 0.3,
+        hue: Math.random() * 30 + 340
+      };
+    }
+
+    function animateHearts() {
+      requestAnimationFrame(animateHearts);
+      heartCtx.clearRect(0, 0, heartCanvas.width, heartCanvas.height);
+
+      hearts.forEach((h, i) => {
+        h.y += h.speed;
+        if (h.y > heartCanvas.height) {
+          h.y = -50;
+          h.x = Math.random() * heartCanvas.width;
+        }
+
+        heartCtx.beginPath();
+        heartCtx.fillStyle = `hsla(${h.hue}, 100%, 60%, 0.7)`;
+        heartCtx.scale(h.scale, h.scale);
+        heartCtx.translate(h.x / h.scale, h.y / h.scale);
+        heartCtx.bezierCurveTo(0, -30 * h.scale, -10 * h.scale, -30 * h.scale, -30 * h.scale, -15 * h.scale);
+        heartCtx.bezierCurveTo(-36 * h.scale, 0, 0, 15 * h.scale, 30 * h.scale, -15 * h.scale);
+        heartCtx.bezierCurveTo(10 * h.scale, -30 * h.scale, 0, -15 * h.scale, 0, -15 * h.scale);
+        heartCtx.fill();
+        heartCtx.setTransform(1, 0, 0, 1, 0, 0);
+
+        h.x += Math.sin(Date.now() * 0.001 + i) * 1.2;
+      });
+
+      if (hearts.length < 80) {
+        hearts.push(createHeart());
+      }
+    }
+    animateHearts();
   </script>
 </body>
 </html>
