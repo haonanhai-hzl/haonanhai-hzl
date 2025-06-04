@@ -1,260 +1,180 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>祝孙家赢高考大捷</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: "Microsoft YaHei", sans-serif;
-            background: radial-gradient(circle at center, #f8f9fa 0%, #e6e9ef 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* 全屏粒子背景 */
-        #particles {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            z-index: 0;
-        }
-
-        .text-container {
-            position: relative;
-            z-index: 2; /* 文字容器层级提升 */
-            text-align: center;
-            max-width: 600px;
-            width: 90%;
-            padding: 40px 30px;
-            background: rgba(255, 255, 255, 0.92);
-            border-radius: 25px;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.18);
-            backdrop-filter: blur(12px);
-            transition: transform 0.3s ease;
-        }
-
-        .text-container:hover {
-            transform: translateY(-5px);
-        }
-
-        .title {
-            font-size: clamp(28px, 6vw, 36px); /* 响应式字体 */
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 12px;
-            background: linear-gradient(to right, #ff8eb1, #ff6b81);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            display: inline-block;
-            text-shadow: 0 2px 4px rgba(255, 107, 129, 0.2);
-        }
-
-        .name {
-            font-size: clamp(24px, 5vw, 32px);
-            font-style: italic;
-            color: #ff7e9c;
-            margin-bottom: 18px;
-            text-shadow: 2px 2px 6px rgba(255, 107, 129, 0.35);
-            letter-spacing: 1px;
-        }
-
-        .message {
-            font-size: clamp(16px, 4vw, 22px);
-            color: #555;
-            line-height: 1.9;
-            margin-bottom: 25px;
-            letter-spacing: 0.5px;
-        }
-
-        .message strong {
-            color: #ff5e7e;
-            font-weight: 600;
-            text-shadow: 0 1px 2px rgba(255, 107, 129, 0.4);
-        }
-
-        .heart-signature {
-            font-size: 18px;
-            color: #ff8eb1;
-            font-style: italic;
-            letter-spacing: 1px;
-        }
-
-        .heart-animation {
-            position: fixed; /* 改为fixed定位确保层级 */
-            width: clamp(40px, 10vw, 60px); /* 响应式大小 */
-            height: clamp(40px, 10vw, 60px);
-            z-index: 1; /* 爱心层级高于粒子但低于文字 */
-        }
-
-        .heart-animation:before,
-        .heart-animation:after {
-            content: "";
-            position: absolute;
-            background-color: #ff8eb1;
-            width: 100%;
-            height: 150%;
-            border-radius: 100% 100% 0 0;
-            box-shadow: 0 4px 12px rgba(255, 107, 129, 0.5);
-        }
-
-        .heart-animation:before {
-            transform: rotate(-45deg);
-            transform-origin: 100% 100%;
-            left: 50%;
-            transform: rotate(-45deg) translateX(-50%);
-        }
-
-        .heart-animation:after {
-            transform: rotate(45deg);
-            transform-origin: 0 100%;
-            left: 50%;
-            transform: rotate(45deg) translateX(-50%);
-        }
-
-        @keyframes float-heart {
-            0% {
-                opacity: 0;
-                transform: translateY(100vh) scale(0.6);
-            }
-            10% {
-                opacity: 1;
-            }
-            85% {
-                opacity: 1;
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-80px) scale(1.3);
-            }
-        }
-
-        /* 优化后的爱心位置（适配移动端） */
-        .heart-1 { animation: float-heart 10s infinite ease-in-out; left: 12%; top: -120px; }
-        .heart-2 { animation: float-heart 8.5s infinite ease-in-out; left: 28%; top: -100px; }
-        .heart-3 { animation: float-heart 9.2s infinite ease-in-out; left: 45%; top: -130px; }
-        .heart-4 { animation: float-heart 7.8s infinite ease-in-out; left: 62%; top: -110px; }
-        .heart-5 { animation: float-heart 11.5s infinite ease-in-out; left: 80%; top: -120px; }
-        .heart-6 { animation: float-heart 8.2s infinite ease-in-out; left: 18%; top: -90px; }
-        .heart-7 { animation: float-heart 9.8s infinite ease-in-out; left: 35%; top: -140px; }
-        .heart-8 { animation: float-heart 7.3s infinite ease-in-out; left: 52%; top: -100px; }
-        .heart-9 { animation: float-heart 10.8s infinite ease-in-out; left: 68%; top: -130px; }
-        .heart-10 { animation: float-heart 8.7s infinite ease-in-out; left: 85%; top: -90px; }
-        .heart-11 { animation: float-heart 9.5s infinite ease-in-out; left: 22%; top: -110px; }
-        .heart-12 { animation: float-heart 7.5s infinite ease-in-out; left: 40%; top: -120px; }
-    </style>
+  <meta charset="UTF-8" />
+  <!-- 适配手机端，禁止缩放干扰动画 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>祝孙家赢高考大捷</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      /* 固定高度占满屏幕，溢出隐藏避免滚动干扰 */
+      height: 100vh;
+      overflow: hidden;
+      /* 柔和渐变背景，突出爱心 */
+      background: linear-gradient(135deg, #ffe6f2, #f9f9f9);
+      /* 让内容垂直水平居中 */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: "Microsoft YaHei", sans-serif;
+      position: relative;
+    }
+    /* 核心：让 canvas 作为 “前景层”，文字在上方 */
+    #heartCanvas {
+      position: fixed; 
+      /* 覆盖整个视口，层级低于文字但高于背景 */
+      width: 100vw; 
+      height: 100vh; 
+      z-index: 1; 
+      /* 让 canvas 背景透明，只显示爱心 */
+      background: transparent; 
+    }
+    .card {
+      /* 文字卡片层级更高，盖在爱心上方 */
+      position: relative; 
+      z-index: 2; 
+      width: 90%;
+      max-width: 500px;
+      background: rgba(255, 255, 255, 0.92);
+      padding: 30px 20px;
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      /* 毛玻璃效果（可选，增强浪漫） */
+      backdrop-filter: blur(8px); 
+    }
+    .title {
+      font-size: 28px;
+      color: #ff4d6a;
+      font-weight: bold;
+      margin-bottom: 12px;
+      /* 文字渐变（呼应爱心色调） */
+      background: linear-gradient(90deg, #ff6b81, #ff4757);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .subtitle {
+      font-size: 24px;
+      color: #ff6b81;
+      font-style: italic;
+      margin-bottom: 20px;
+      text-shadow: 0 2px 3px rgba(255, 107, 129, 0.2);
+    }
+    .message {
+      font-size: 17px;
+      color: #555;
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+    .message strong {
+      color: #ff4757;
+      font-weight: 600;
+    }
+    .signature {
+      font-size: 16px;
+      color: #ff8eb1;
+      font-style: italic;
+      margin-top: 15px;
+    }
+  </style>
 </head>
-
 <body>
-    <div id="particles"></div>
+  <!-- 爱心 canvas 容器，作为前景动态层 -->
+  <canvas id="heartCanvas"></canvas>
+  <!-- 文字卡片 -->
+  <div class="card">
+    <h1 class="title">祝孙家赢同学</h1>
+    <p class="subtitle">高考大捷</p>
+    <p class="message">
+      <strong>笔尖划过的每一寸试卷</strong>，都是你日夜积累的星光<br />
+      此刻的你，已身披勇气的铠甲，只待绽放锋芒<br /><br />
+      愿这场考试成为你梦想的跳板<br />
+      让所有努力都不被辜负，所有期待都开花结果<br /><br />
+      <strong>高考顺利，未来可期</strong>！<br />
+      你值得所有美好的远方~<br /><br />
+      ——你的朋友何子龙真诚的祝福
+    </p>
+  </div>
 
-    <div class="text-container">
-        <h1 class="title">祝孙家赢同学</h1>
-        <p class="name">高考大捷</p>
-        <p class="message">
-            <strong>笔尖划过的每一寸试卷</strong>，都是你日夜积累的星光<br>
-            此刻的你，已身披勇气的铠甲，只待绽放锋芒<br>
-            <br>
-            愿这场考试成为你梦想的跳板<br>
-            让所有努力都不被辜负，所有期待都开花结果<br>
-            <br>
-            <strong>高考顺利，未来可期</strong>！<br>
-            你值得所有美好的远方~<br>
-            <br>
-            <p class="heart-signature">——你的朋友何子龙 携漫天心意祝福</p>
-        </p>
-    </div>
+  <script>
+    // 【核心：Canvas 动态爱心逻辑】
+    const canvas = document.getElementById('heartCanvas');
+    const ctx = canvas.getContext('2d');
+    let hearts = []; // 存储爱心粒子
 
-    <!-- 新增爱心元素增强浪漫感 -->
-    <div class="heart-animation heart-1"></div>
-    <div class="heart-animation heart-2"></div>
-    <div class="heart-animation heart-3"></div>
-    <div class="heart-animation heart-4"></div>
-    <div class="heart-animation heart-5"></div>
-    <div class="heart-animation heart-6"></div>
-    <div class="heart-animation heart-7"></div>
-    <div class="heart-animation heart-8"></div>
-    <div class="heart-animation heart-9"></div>
-    <div class="heart-animation heart-10"></div>
-    <div class="heart-animation heart-11"></div>
-    <div class="heart-animation heart-12"></div>
+    // 初始化 canvas 尺寸（适配手机）
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // 生成全屏粒子背景（优化颜色和动画）
-            const particles = document.getElementById('particles');
-            const particleCount = 120;
+    // 生成随机爱心（数学公式：爱心曲线）
+    function createHeart(x, y) {
+      return {
+        x,
+        y,
+        // 随机飘落速度（y 轴）
+        speed: Math.random() * 2 + 1, 
+        // 随机缩放（0.3~1 倍，避免太大/太小）
+        scale: Math.random() * 0.7 + 0.3, 
+        // 让爱心颜色有细微变化（粉-红渐变）
+        hue: Math.random() * 30 + 340 
+      };
+    }
 
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                const size = Math.random() * 4 + 1;
-                const posX = Math.random() * 100;
-                const posY = Math.random() * 100;
-                const duration = Math.random() * 25 + 15;
-                const delay = Math.random() * 8;
-                const opacity = Math.random() * 0.4 + 0.1;
-                const hue = Math.random() * 30 + 340; // 限定粉色系色调
+    // 每一帧绘制 + 动画逻辑
+    function animate() {
+      requestAnimationFrame(animate);
+      // 清空画布（透明背景，不清空会拖影）
+      ctx.clearRect(0, 0, canvas.width, canvas.height); 
 
-                particle.style.position = 'absolute';
-                particle.style.width = `${size}px`;
-                particle.style.height = `${size}px`;
-                particle.style.background = `hsla(${hue}, 100%, 70%, ${opacity})`;
-                particle.style.borderRadius = '50%';
-                particle.style.left = `${posX}%`;
-                particle.style.top = `${posY}%`;
-                particle.style.animation = `float ${duration}s ease-in-out ${delay}s infinite`;
-                particle.style.zIndex = '0';
+      hearts.forEach((heart, index) => {
+        // 更新位置：让爱心 “往下飘”
+        heart.y += heart.speed;
 
-                particles.appendChild(particle);
-            }
+        // 超出屏幕就重置（从顶部重新掉落）
+        if (heart.y > canvas.height) {
+          heart.y = -50; 
+          heart.x = Math.random() * canvas.width;
+        }
 
-            // 添加粒子浮动动画
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes float {
-                    0%, 100% {
-                        transform: translate(0, 0) scale(1);
-                    }
-                    50% {
-                        transform: translate(${Math.random() * 30 - 15}px, ${Math.random() * 30 - 15}px) scale(1.2);
-                    }
-                }
-            `;
-            document.head.appendChild(style);
+        // 绘制爱心：用二次贝塞尔曲线模拟
+        ctx.beginPath();
+        // 爱心颜色（HSLA 让透明度变化更柔和）
+        ctx.fillStyle = `hsla(${heart.hue}, 100%, 60%, 0.7)`; 
+        // 缩放后的爱心尺寸
+        const size = 30 * heart.scale; 
+        // 爱心曲线公式（核心数学逻辑）
+        ctx.scale(heart.scale, heart.scale);
+        ctx.translate(heart.x / heart.scale, heart.y / heart.scale);
+        ctx.bezierCurveTo(0, -size/2, -size/3, -size, -size, -size/2);
+        ctx.bezierCurveTo(-size*1.2, 0, 0, size/2, size, -size/2);
+        ctx.bezierCurveTo(size/3, -size, 0, -size/2, 0, -size/2);
+        ctx.fill();
+        // 重置变换（避免影响下一帧）
+        ctx.setTransform(1, 0, 0, 1, 0, 0); 
 
-            // 移动端适配：调整爱心层级和定位
-            function adjustForMobile() {
-                const isMobile = window.innerWidth < 768;
-                const hearts = document.querySelectorAll('.heart-animation');
-                
-                hearts.forEach(heart => {
-                    if (isMobile) {
-                        heart.style.zIndex = '3'; // 移动端爱心层级高于文字
-                    } else {
-                        heart.style.zIndex = '1'; // 桌面端恢复正常层级
-                    }
-                });
-            }
+        // 可选：让爱心左右 “飘” 动（增加随机性）
+        heart.x += Math.sin(Date.now() * 0.001 + index) * 1.2;
+      });
 
-            // 初始化适配并监听窗口变化
-            adjustForMobile();
-            window.addEventListener('resize', adjustForMobile);
-        });
-    </script>
+      // 定时补充新爱心（保持画面持续飘落）
+      if (hearts.length < 80) { 
+        // 从顶部随机位置生成
+        hearts.push(createHeart(Math.random() * canvas.width, -50)); 
+      }
+    }
+
+    // 启动动画
+    animate();
+  </script>
 </body>
-
 </html>
